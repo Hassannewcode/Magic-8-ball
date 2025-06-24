@@ -1,215 +1,190 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Magic 8 Ball</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Magic 8 Ball — Polished</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
-    :root {
-      --bg-color: #121212; /* matte black */
-      --ball-dark: #222831;
-      --ball-light: #393e46;
-      --glow-blue: #4fc3f7;
-      --text-main: #eeeeee;
-      --text-muted: #999999;
-      --triangle-blue: #1e88e5;
-      --line-color: #bbbbbb;
-    }
+  :root {
+    --bg: #121212;
+    --ball-dark: #232323;
+    --ball-light: #3a3a3a;
+    --blue-glow: #2ca8ff;
+    --text-main: #eee;
+    --text-muted: #777;
+    --line: #555;
+  }
 
-    * {
-      box-sizing: border-box;
-    }
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
 
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      background: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Poppins', sans-serif;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
+  body, html {
+    margin: 0; padding: 0;
+    height: 100vh;
+    background: var(--bg);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-    #eightBall {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle at 30% 30%, var(--ball-light), var(--ball-dark));
-      border-radius: 50%;
-      box-shadow:
-        inset 0 6px 20px rgba(255 255 255 / 0.12),
-        0 0 40px rgba(79,195,247, 0.2);
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
-      perspective: 800px;
-      cursor: default;
-      user-select: none;
-    }
+  #eightBall {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle at 30% 30%, var(--ball-light), var(--ball-dark));
+    border-radius: 50%;
+    box-shadow:
+      inset 0 6px 20px rgba(255 255 255 / 0.12),
+      0 0 40px var(--blue-glow);
+    filter: drop-shadow(0 4px 15px rgba(0,0,0,0.7));
+    user-select: none;
+  }
 
-    #ballShine {
-      position: absolute;
-      top: 30px;
-      left: 50px;
-      width: 60px;
-      height: 60px;
-      background: radial-gradient(circle at 25% 25%, #ffffff44, transparent 80%);
-      border-radius: 50%;
-      pointer-events: none;
-      filter: blur(6px);
-      transform: rotate(-15deg);
-      z-index: 10;
-    }
+  #shine {
+    position: absolute;
+    top: 30px; left: 50px;
+    width: 70px; height: 70px;
+    background: radial-gradient(circle at 25% 25%, #fff3, transparent 85%);
+    border-radius: 50%;
+    filter: blur(6px);
+    pointer-events: none;
+    transform: rotate(-20deg);
+    z-index: 10;
+  }
 
-    #triangleContainer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 140px;
-      height: 120px;
-      transform-style: preserve-3d;
-      transform-origin: center;
-      transform: translate(-50%, -55%);
-      pointer-events: none;
-      filter: drop-shadow(0 0 6px var(--glow-blue));
-    }
+  #triangleContainer {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 140px; height: 120px;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    transform: translate(-50%, -55%);
+    pointer-events: none;
+    filter: drop-shadow(0 0 10px var(--blue-glow));
+  }
 
-    #triangle {
-      width: 0;
-      height: 0;
-      border-left: 70px solid transparent;
-      border-right: 70px solid transparent;
-      border-bottom: 120px solid var(--triangle-blue);
-      filter: drop-shadow(0 0 12px var(--glow-blue));
-      border-radius: 10px;
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-      box-shadow:
-        0 0 30px var(--glow-blue),
-        inset 0 0 40px var(--glow-blue);
-    }
+  #triangle {
+    width: 0; height: 0;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 120px solid var(--blue-glow);
+    border-radius: 12px;
+    box-shadow:
+      0 0 30px var(--blue-glow),
+      inset 0 0 45px var(--blue-glow);
+    backface-visibility: hidden;
+  }
 
-    #answerText {
-      position: absolute;
-      top: 45px;
-      left: 50%;
-      width: 110px;
-      transform: translateX(-50%);
-      color: #d0e9ff;
-      font-weight: 600;
-      font-size: 16px;
-      text-align: center;
-      letter-spacing: 0.02em;
-      text-shadow:
-        0 0 6px #a0cfff,
-        0 0 14px #80bfff;
-      user-select: none;
-      line-height: 1.2em;
-      min-height: 3em;
-      word-wrap: break-word;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      pointer-events: none;
-      filter: drop-shadow(0 0 8px #88c9ff);
-    }
+  #answerText {
+    position: absolute;
+    top: 42px; left: 50%;
+    width: 110px;
+    transform: translateX(-50%);
+    color: #def1ff;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.2;
+    text-align: center;
+    letter-spacing: 0.03em;
+    user-select: none;
+    filter:
+      drop-shadow(0 0 8px #8fcfff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-    #questionBox {
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90vw;
-      max-width: 600px;
-      text-align: center;
-      user-select: text;
-      z-index: 100;
-    }
+  #questionBox {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    width: 90vw;
+    text-align: center;
+    user-select: text;
+    z-index: 50;
+  }
 
-    #questionText {
-      font-size: 26px;
-      font-weight: 500;
-      color: var(--text-main);
-      margin-bottom: 6px;
-      min-height: 34px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'Poppins', sans-serif;
-    }
+  #questionText {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    min-height: 38px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    #underlineLine {
-      width: 100%;
-      max-width: 600px;
-      height: 2px;
-      margin: 0 auto 8px auto;
-      background: var(--line-color);
-      user-select: none;
-    }
+  #underline {
+    width: 100%;
+    height: 2px;
+    background: var(--line);
+    margin-bottom: 10px;
+    user-select: none;
+  }
 
-    #helperText {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-muted);
-      font-style: italic;
-      font-family: 'Poppins', sans-serif;
-      user-select: none;
-    }
+  #helperText {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
 
-    #questionInput {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90vw;
-      max-width: 600px;
-      font-size: 22px;
-      font-weight: 500;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      background: var(--ball-dark);
-      color: var(--text-main);
-      text-align: center;
-      font-family: 'Poppins', sans-serif;
-      outline: none;
-      user-select: text;
-      transition: box-shadow 0.3s ease;
-      box-shadow: 0 0 8px #00000044;
-      caret-color: var(--glow-blue);
-    }
+  #questionInput {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 600px;
+    font-size: 22px;
+    font-weight: 500;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 12px;
+    background: var(--ball-dark);
+    color: var(--text-main);
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    outline: none;
+    caret-color: var(--blue-glow);
+    box-shadow: 0 0 8px #0008;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+    user-select: text;
+  }
 
-    #questionInput::placeholder {
-      color: var(--text-muted);
-      opacity: 0.6;
-      font-style: italic;
-    }
+  #questionInput::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+    font-style: italic;
+  }
 
-    #questionInput:focus {
-      box-shadow: 0 0 15px var(--glow-blue);
-      background: #1c1f26;
-    }
-
-    /* GSAP animations triggers */
-
-  </style>
+  #questionInput:focus {
+    box-shadow: 0 0 18px var(--blue-glow);
+    background: #1f1f1f;
+  }
+</style>
 </head>
 <body>
 
-  <div id="eightBall">
-    <div id="ballShine"></div>
-    <div id="triangleContainer">
+  <div id="eightBall" aria-label="Magic 8 Ball" role="img">
+    <div id="shine"></div>
+    <div id="triangleContainer" aria-live="polite" aria-atomic="true">
       <div id="triangle"></div>
       <div id="answerText"></div>
     </div>
   </div>
 
-  <div id="questionBox">
-    <div id="questionText"></div>
-    <div id="underlineLine"></div>
+  <div id="questionBox" aria-live="polite" aria-atomic="true">
+    <div id="questionText" aria-label="User question"></div>
+    <div id="underline"></div>
     <div id="helperText">*press enter to ask*</div>
   </div>
 
@@ -219,6 +194,7 @@
     placeholder="Type your question here..."
     autocomplete="off"
     spellcheck="false"
+    aria-label="Question input"
   />
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
@@ -251,63 +227,58 @@
     const answerText = document.getElementById('answerText');
     const triangleContainer = document.getElementById('triangleContainer');
     const eightBall = document.getElementById('eightBall');
-    const helperText = document.getElementById('helperText');
 
-    // Idle animation for the ball & triangle - gentle floating and subtle 3D rotation
+    // Idle float for ball and subtle slow rotation for triangle container
     gsap.to(eightBall, {
-      y: -8,
+      y: -6,
       repeat: -1,
       yoyo: true,
       ease: "power1.inOut",
       duration: 3
     });
+
     gsap.to(triangleContainer, {
-      rotationY: 12,
+      rotationY: 15,
       repeat: -1,
       yoyo: true,
       ease: "power1.inOut",
-      duration: 4,
+      duration: 5,
       transformOrigin: "50% 50%"
     });
 
-    // Show question and answer with smooth animations
     function showAnswer(question, answer) {
       questionText.textContent = question;
       answerText.textContent = answer;
 
-      // Animate question upwards and fade out after 5s
-      gsap.fromTo(questionText, 
-        { y: 0, opacity: 0 }, 
+      gsap.fromTo(questionText,
+        { y: 0, opacity: 0 },
         { y: -50, opacity: 1, duration: 1, ease: "power3.out" });
 
-      // Animate answer text fade + pop inside triangle
-      gsap.fromTo(answerText, 
-        { scale: 0.8, opacity: 0 }, 
+      gsap.fromTo(answerText,
+        { scale: 0.8, opacity: 0 },
         { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)" });
 
-      // Animate underline line glow
-      gsap.fromTo("#underlineLine", 
+      gsap.fromTo('#underline',
         { boxShadow: "0 0 0px transparent" },
-        { boxShadow: "0 0 8px var(--glow-blue)", duration: 1, yoyo: true, repeat: 1 });
+        { boxShadow: "0 0 8px var(--blue-glow)", duration: 1, yoyo: true, repeat: 1 });
     }
 
     input.addEventListener('keydown', e => {
-      if (e.key === "Enter") {
+      if (e.key === 'Enter') {
         const question = input.value.trim();
         if (!question) return;
 
         const answer = answers[Math.floor(Math.random() * answers.length)];
         showAnswer(question, answer);
 
-        // Clear input after asking
         input.value = "";
 
-        // Animate question text from bottom center to top center
-        gsap.fromTo('#questionBox', 
+        gsap.fromTo('#questionBox',
           { y: 60, opacity: 0 },
           { y: -130, opacity: 1, duration: 1.5, ease: "power3.out" });
       }
     });
   </script>
+
 </body>
 </html>
