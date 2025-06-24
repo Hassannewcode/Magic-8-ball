@@ -36,6 +36,8 @@
     margin: 0;
     text-shadow: 0 0 8px rgba(10, 132, 255, 0.8);
     user-select: text;
+    word-break: break-word;
+    min-height: 36px;
   }
 
   #underline {
@@ -76,6 +78,7 @@
     caret-color: #0a84ff;
     user-select: text;
     transition: border-color 0.3s ease;
+    cursor: text;
   }
 
   #input-field::placeholder {
@@ -98,7 +101,7 @@
 </head>
 <body>
   <div id="question-container" aria-live="polite" aria-atomic="true" role="region">
-    <p id="question-text"></p>
+    <p id="question-text" aria-live="assertive" aria-atomic="true"></p>
     <div id="underline"></div>
     <div id="helper-text">*press enter to ask*</div>
   </div>
@@ -239,7 +242,7 @@
         textTexture.needsUpdate = true;
       }
 
-      // Text wrapping utility
+      // Text wrapping utility (fixed edge cases)
       function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
         const words = text.split(' ');
         let line = '';
@@ -312,7 +315,7 @@
           ease: "power2.out",
           bottom: "auto",
           top: "30px",
-          onComplete: () => { helperText.style.opacity = 0; }
+          onStart: () => { helperText.style.opacity = 0; }
         });
       }
       // Animate question container down and reset UI
@@ -328,6 +331,7 @@
             input.disabled = false;
             questionText.textContent = "";
             gsap.to(textPlane.material, {opacity: 0, duration: 0.5});
+            input.focus();
           }
         });
       }
@@ -386,6 +390,11 @@
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
+
+      // Focus input on page load for usability
+      window.onload = () => {
+        input.focus();
+      };
     })();
   </script>
 </body>
