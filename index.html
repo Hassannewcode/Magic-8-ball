@@ -14,21 +14,32 @@
       user-select: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      height: 100vh;
+      position: relative;
     }
     #overlay {
-      position: absolute;
-      top: 20px;
-      width: 100%;
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+      max-width: 600px;
       text-align: center;
       z-index: 10;
       pointer-events: auto;
+      transition: bottom 1s ease, top 1s ease;
+    }
+    #overlay.raised {
+      bottom: auto;
+      top: 30px;
+      transform: translateX(-50%);
     }
     #question {
       font-size: 20px;
       font-weight: 600;
       padding: 14px 18px;
-      width: 320px;
-      max-width: 90vw;
+      width: 300px;
+      max-width: 80vw;
       border-radius: 12px;
       border: none;
       outline: none;
@@ -58,6 +69,13 @@
       background: linear-gradient(145deg, #003dbb, #001f70);
       box-shadow: 0 0 20px #0040ffee;
     }
+    #canvas {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -71,10 +89,9 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.min.js"></script>
 
   <script>
-    // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 1.5, 5);
+    camera.position.set(0, 0.5, 6);
 
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas"), antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -83,17 +100,17 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
-    controls.minDistance = 3;
+    controls.minDistance = 4;
     controls.maxDistance = 10;
     controls.enablePan = false;
 
     // Lights
-    const pointLight = new THREE.PointLight(0xffffff, 1.2);
+    const pointLight = new THREE.PointLight(0xffffff, 1.5);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
     scene.add(new THREE.AmbientLight(0x222222));
 
-    // Magic 8 Ball (matte black sphere)
+    // Magic 8 Ball sphere
     const ballGeometry = new THREE.SphereGeometry(1.5, 128, 128);
     const ballMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x111111,
@@ -140,23 +157,28 @@
     const die = new THREE.Mesh(dieGeometry, dieMaterial);
     scene.add(die);
 
-    // Create a canvas texture to display the answer text on the window
+    // Canvas texture for answer text
     const textCanvas = document.createElement('canvas');
     textCanvas.width = 512;
     textCanvas.height = 512;
     const ctx = textCanvas.getContext('2d');
     const textTexture = new THREE.CanvasTexture(textCanvas);
 
-    // Plane to show answer text, positioned just in front of window
-    const textPlaneMaterial = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true });
+    const textPlaneMaterial = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true, opacity: 0 });
     const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), textPlaneMaterial);
     textPlane.position.z = 1.53;
     ball.add(textPlane);
 
+    // Glow effect for the window when lighting up
+    let glowIntensity = 0;
+    function updateWindowGlow() {
+      windowMaterial.emissiveIntensity = 0.5 + glowIntensity * 1.5;
+      ballWindow.material.emissiveIntensity = windowMaterial.emissiveIntensity;
+    }
+
     function drawAnswer(text) {
       ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
 
-      // Background glow
       const gradient = ctx.createRadialGradient(textCanvas.width/2, textCanvas.height/2, 50, textCanvas.width/2, textCanvas.height/2, 220);
       gradient.addColorStop(0, 'rgba(0,68,255,0.8)');
       gradient.addColorStop(1, 'rgba(0,0,0,0)');
@@ -164,7 +186,6 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, textCanvas.width, textCanvas.height);
 
-      // White text with shadow
       ctx.fillStyle = 'white';
       ctx.font = 'bold 48px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
       ctx.textAlign = 'center';
@@ -176,7 +197,6 @@
       textTexture.needsUpdate = true;
     }
 
-    // Standard 20 Magic 8 Ball answers
     const standardAnswers = [
       "It is certain", "It is decidedly so", "Without a doubt", "Yes, definitely",
       "You may rely on it", "As I see it, yes", "Most likely", "Outlook good",
@@ -186,10 +206,10 @@
       "Outlook not so good", "Very doubtful"
     ];
 
-    // Animate die rotation (spin + slow stop)
-    function animateDie(answer, onComplete) {
+    // Animate the die spin with easing
+    function animateDie(onComplete) {
       const startRot = die.rotation.clone();
-      const spins = 4 + Math.random() * 3; // Spins between 4-7
+      const spins = 5 + Math.random() * 4; // 5-9 spins
       const targetRot = new THREE.Euler(
         startRot.x + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
         startRot.y + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
@@ -197,7 +217,7 @@
       );
 
       let progress = 0;
-      const duration = 1500; // ms
+      const duration = 1700; // ms
       const startTime = performance.now();
 
       function spin() {
@@ -218,18 +238,36 @@
       spin();
     }
 
-    // Easing function for smooth stop
     function easeOutCubic(t) {
       return 1 - Math.pow(1 - t, 3);
     }
 
     async function askQuestion() {
+      const overlay = document.getElementById('overlay');
       const questionInput = document.getElementById('question');
       const question = questionInput.value.trim();
       if (!question) return;
 
-      // Clear input for next question
-      questionInput.value = '';
+      questionInput.disabled = true;
+      questionInput.style.opacity = '0.5';
+      document.querySelector('button').disabled = true;
+      document.querySelector('button').style.opacity = '0.5';
+
+      // Animate question input upwards to top
+      overlay.classList.add('raised');
+
+      // Animate 8 ball glow up
+      glowIntensity = 0;
+      const glowDuration = 1000;
+      const glowStart = performance.now();
+      function glowUp() {
+        const now = performance.now();
+        const t = Math.min((now - glowStart) / glowDuration, 1);
+        glowIntensity = t;
+        updateWindowGlow();
+        if (t < 1) requestAnimationFrame(glowUp);
+      }
+      glowUp();
 
       // Get answer from AI or fallback
       let answer = null;
@@ -240,8 +278,33 @@
         answer = standardAnswers[Math.floor(Math.random() * standardAnswers.length)];
       }
 
-      // Animate die then show answer
-      animateDie(answer, () => drawAnswer(answer));
+      // Spin die then show answer
+      animateDie(() => {
+        drawAnswer(answer);
+        fadeInAnswer();
+        // After showing answer, re-enable input after delay
+        setTimeout(() => {
+          questionInput.disabled = false;
+          questionInput.style.opacity = '1';
+          document.querySelector('button').disabled = false;
+          document.querySelector('button').style.opacity = '1';
+        }, 1500);
+      });
+    }
+
+    // Fade-in answer text
+    function fadeInAnswer() {
+      let opacity = 0;
+      textPlane.material.opacity = 0;
+      function fade() {
+        opacity += 0.02;
+        if (opacity > 1) opacity = 1;
+        textPlane.material.opacity = opacity;
+        if (opacity < 1) {
+          requestAnimationFrame(fade);
+        }
+      }
+      fade();
     }
 
     async function getAIAnswer(question) {
@@ -269,15 +332,17 @@
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
+
+      // Slow gentle rotation of the ball and die
+      ball.rotation.y += 0.002;
+      die.rotation.x += 0.004;
+      die.rotation.y += 0.006;
+
       renderer.render(scene, camera);
     }
 
-    // Position die inside ball
-    die.position.set(0, 0, 0);
-
     animate();
 
-    // Responsive resizing
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
