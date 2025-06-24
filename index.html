@@ -1,311 +1,103 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Magic 8 Ball</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@600&display=swap');
 
-    :root {
-      --bg-color: #121212; /* matte black */
-      --ball-dark: #222831;
-      --ball-light: #393e46;
-      --glow-blue: #4fc3f7;
-      --text-main: #eeeeee;
-      --text-muted: #999999;
-      --triangle-blue: #1e88e5;
-      --line-color: #bbbbbb;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      background: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
       overflow: hidden;
+      height: 100vh;
+    }
+
+    #container {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      user-select: none;
+      opacity: 1;
     }
 
-    #eightBall {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle at 30% 30%, var(--ball-light), var(--ball-dark));
-      border-radius: 50%;
-      box-shadow:
-        inset 0 6px 20px rgba(255 255 255 / 0.12),
-        0 0 40px rgba(79,195,247, 0.2);
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
-      perspective: 800px;
-      cursor: default;
-      user-select: none;
+    #question-input {
+      background: none;
+      border: none;
+      border-bottom: 2px solid #666;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      outline: none;
+      width: 90%;
+      max-width: 600px;
+      padding: 10px;
     }
 
-    #ballShine {
-      position: absolute;
-      top: 30px;
-      left: 50px;
-      width: 60px;
-      height: 60px;
-      background: radial-gradient(circle at 25% 25%, #ffffff44, transparent 80%);
-      border-radius: 50%;
-      pointer-events: none;
-      filter: blur(6px);
-      transform: rotate(-15deg);
-      z-index: 10;
+    #helper {
+      color: #777;
+      margin-top: 8px;
+      font-size: 14px;
     }
 
-    #triangleContainer {
+    #answer {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 140px;
-      height: 120px;
-      transform-style: preserve-3d;
-      transform-origin: center;
-      transform: translate(-50%, -55%);
-      pointer-events: none;
-      filter: drop-shadow(0 0 6px var(--glow-blue));
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      color: #0af;
+      opacity: 0;
     }
-
-    #triangle {
-      width: 0;
-      height: 0;
-      border-left: 70px solid transparent;
-      border-right: 70px solid transparent;
-      border-bottom: 120px solid var(--triangle-blue);
-      filter: drop-shadow(0 0 12px var(--glow-blue));
-      border-radius: 10px;
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-      box-shadow:
-        0 0 30px var(--glow-blue),
-        inset 0 0 40px var(--glow-blue);
-    }
-
-    #answerText {
-      position: absolute;
-      top: 45px;
-      left: 50%;
-      width: 110px;
-      transform: translateX(-50%);
-      color: #d0e9ff;
-      font-weight: 600;
-      font-size: 16px;
-      text-align: center;
-      letter-spacing: 0.02em;
-      text-shadow:
-        0 0 6px #a0cfff,
-        0 0 14px #80bfff;
-      user-select: none;
-      line-height: 1.2em;
-      min-height: 3em;
-      word-wrap: break-word;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      pointer-events: none;
-      filter: drop-shadow(0 0 8px #88c9ff);
-    }
-
-    #questionBox {
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90vw;
-      max-width: 600px;
-      text-align: center;
-      user-select: text;
-      z-index: 100;
-    }
-
-    #questionText {
-      font-size: 26px;
-      font-weight: 500;
-      color: var(--text-main);
-      margin-bottom: 6px;
-      min-height: 34px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    #underlineLine {
-      width: 100%;
-      max-width: 600px;
-      height: 2px;
-      margin: 0 auto 8px auto;
-      background: var(--line-color);
-      user-select: none;
-    }
-
-    #helperText {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-muted);
-      font-style: italic;
-      font-family: 'Poppins', sans-serif;
-      user-select: none;
-    }
-
-    #questionInput {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90vw;
-      max-width: 600px;
-      font-size: 22px;
-      font-weight: 500;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      background: var(--ball-dark);
-      color: var(--text-main);
-      text-align: center;
-      font-family: 'Poppins', sans-serif;
-      outline: none;
-      user-select: text;
-      transition: box-shadow 0.3s ease;
-      box-shadow: 0 0 8px #00000044;
-      caret-color: var(--glow-blue);
-    }
-
-    #questionInput::placeholder {
-      color: var(--text-muted);
-      opacity: 0.6;
-      font-style: italic;
-    }
-
-    #questionInput:focus {
-      box-shadow: 0 0 15px var(--glow-blue);
-      background: #1c1f26;
-    }
-
-    /* GSAP animations triggers */
-
   </style>
 </head>
 <body>
 
-  <div id="eightBall">
-    <div id="ballShine"></div>
-    <div id="triangleContainer">
-      <div id="triangle"></div>
-      <div id="answerText"></div>
-    </div>
+  <div id="container">
+    <input id="question-input" type="text" placeholder="am I a man?" />
+    <div id="helper">*press enter to ask*</div>
   </div>
+  <div id="answer"></div>
 
-  <div id="questionBox">
-    <div id="questionText"></div>
-    <div id="underlineLine"></div>
-    <div id="helperText">*press enter to ask*</div>
-  </div>
-
-  <input
-    id="questionInput"
-    type="text"
-    placeholder="Type your question here..."
-    autocomplete="off"
-    spellcheck="false"
-  />
-
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script>
+    const input = document.getElementById('question-input');
+    const container = document.getElementById('container');
+    const answerBox = document.getElementById('answer');
+
     const answers = [
-      "It is certain",
-      "It is decidedly so",
-      "Without a doubt",
-      "Yes, definitely",
-      "You may rely on it",
-      "As I see it, yes",
-      "Most likely",
-      "Outlook good",
-      "Yes",
-      "Signs point to yes",
-      "Reply hazy",
-      "Ask again later",
-      "Better not tell you",
-      "Cannot predict now",
-      "Concentrate again",
-      "Don't count on it",
-      "My reply is no",
-      "My sources say no",
-      "Outlook not so good",
-      "Very doubtful"
+      "It is certain", "It is decidedly so", "Without a doubt", "Yes, definitely",
+      "You may rely on it", "As I see it, yes", "Most likely", "Outlook good",
+      "Yes", "Signs point to yes", "Reply hazy, try again", "Ask again later",
+      "Better not tell you now", "Cannot predict now", "Concentrate and ask again",
+      "Don't count on it", "My reply is no", "My sources say no",
+      "Outlook not so good", "Very doubtful"
     ];
 
-    const input = document.getElementById('questionInput');
-    const questionText = document.getElementById('questionText');
-    const answerText = document.getElementById('answerText');
-    const triangleContainer = document.getElementById('triangleContainer');
-    const eightBall = document.getElementById('eightBall');
-    const helperText = document.getElementById('helperText');
+    input.focus();
 
-    // Idle animation for the ball & triangle - gentle floating and subtle 3D rotation
-    gsap.to(eightBall, {
-      y: -8,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut",
-      duration: 3
-    });
-    gsap.to(triangleContainer, {
-      rotationY: 12,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut",
-      duration: 4,
-      transformOrigin: "50% 50%"
-    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = input.value.trim();
+        if (q.length === 0) return;
 
-    // Show question and answer with smooth animations
-    function showAnswer(question, answer) {
-      questionText.textContent = question;
-      answerText.textContent = answer;
+        // Animate input to top
+        gsap.to(container, {
+          duration: 1.2,
+          ease: "power2.out",
+          bottom: "80%",
+        });
 
-      // Animate question upwards and fade out after 5s
-      gsap.fromTo(questionText, 
-        { y: 0, opacity: 0 }, 
-        { y: -50, opacity: 1, duration: 1, ease: "power3.out" });
-
-      // Animate answer text fade + pop inside triangle
-      gsap.fromTo(answerText, 
-        { scale: 0.8, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)" });
-
-      // Animate underline line glow
-      gsap.fromTo("#underlineLine", 
-        { boxShadow: "0 0 0px transparent" },
-        { boxShadow: "0 0 8px var(--glow-blue)", duration: 1, yoyo: true, repeat: 1 });
-    }
-
-    input.addEventListener('keydown', e => {
-      if (e.key === "Enter") {
-        const question = input.value.trim();
-        if (!question) return;
-
+        // Show RNG answer
         const answer = answers[Math.floor(Math.random() * answers.length)];
-        showAnswer(question, answer);
-
-        // Clear input after asking
-        input.value = "";
-
-        // Animate question text from bottom center to top center
-        gsap.fromTo('#questionBox', 
-          { y: 60, opacity: 0 },
-          { y: -130, opacity: 1, duration: 1.5, ease: "power3.out" });
+        answerBox.textContent = answer;
+        gsap.fromTo(answerBox, { opacity: 0 }, { opacity: 1, duration: 1.2, delay: 0.8 });
       }
     });
   </script>
