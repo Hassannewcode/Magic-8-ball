@@ -3,282 +3,390 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Magic 8 Ball — Polished</title>
+<title>3D Magic 8 Ball</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@600&display=swap');
 
-  :root {
-    --bg: #121212;
-    --ball-dark: #232323;
-    --ball-light: #3a3a3a;
-    --blue-glow: #2ca8ff;
-    --text-main: #eee;
-    --text-muted: #777;
-    --line: #555;
-  }
-
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  body, html {
-    margin: 0; padding: 0;
+  html, body {
+    margin: 0; padding: 0; overflow: hidden;
     height: 100vh;
-    background: var(--bg);
-    font-family: 'Montserrat', sans-serif;
-    color: var(--text-main);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #eightBall {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle at 30% 30%, var(--ball-light), var(--ball-dark));
-    border-radius: 50%;
-    box-shadow:
-      inset 0 6px 20px rgba(255 255 255 / 0.12),
-      0 0 40px var(--blue-glow);
-    filter: drop-shadow(0 4px 15px rgba(0,0,0,0.7));
-    user-select: none;
-  }
-
-  #shine {
-    position: absolute;
-    top: 30px; left: 50px;
-    width: 70px; height: 70px;
-    background: radial-gradient(circle at 25% 25%, #fff3, transparent 85%);
-    border-radius: 50%;
-    filter: blur(6px);
-    pointer-events: none;
-    transform: rotate(-20deg);
-    z-index: 10;
-  }
-
-  #triangleContainer {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 140px; height: 120px;
-    transform-style: preserve-3d;
-    transform-origin: center center;
-    transform: translate(-50%, -55%);
-    pointer-events: none;
-    filter: drop-shadow(0 0 10px var(--blue-glow));
-  }
-
-  #triangle {
-    width: 0; height: 0;
-    border-left: 70px solid transparent;
-    border-right: 70px solid transparent;
-    border-bottom: 120px solid var(--blue-glow);
-    border-radius: 12px;
-    box-shadow:
-      0 0 30px var(--blue-glow),
-      inset 0 0 45px var(--blue-glow);
-    backface-visibility: hidden;
-  }
-
-  #answerText {
-    position: absolute;
-    top: 42px; left: 50%;
-    width: 110px;
-    transform: translateX(-50%);
-    color: #def1ff;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 1.2;
-    text-align: center;
-    letter-spacing: 0.03em;
-    user-select: none;
-    filter:
-      drop-shadow(0 0 8px #8fcfff);
+    background-color: #000;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    user-select: none;
   }
 
-  #questionBox {
+  #question-container {
     position: fixed;
-    bottom: 70px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    max-width: 600px;
-    width: 90vw;
+    max-width: 90vw;
+    width: 500px;
     text-align: center;
+    cursor: text;
+    z-index: 20;
     user-select: text;
-    z-index: 50;
   }
 
-  #questionText {
+  #question-text {
     font-size: 28px;
     font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 6px;
-    min-height: 38px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #eee;
+    margin: 0;
+    text-shadow: 0 0 8px rgba(10, 132, 255, 0.8);
+    user-select: text;
   }
 
   #underline {
+    margin-top: 6px;
+    border-bottom: 2px solid #1a1a1a;
     width: 100%;
-    height: 2px;
-    background: var(--line);
-    margin-bottom: 10px;
-    user-select: none;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  #helperText {
+  #helper-text {
     font-size: 14px;
     font-style: italic;
-    font-weight: 400;
-    color: var(--text-muted);
+    color: #555;
+    margin-top: 8px;
+    user-select: none;
+    opacity: 1;
+    transition: opacity 0.6s ease;
   }
 
-  #questionInput {
+  #input-field {
     position: fixed;
-    bottom: 15px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     width: 90vw;
-    max-width: 600px;
-    font-size: 22px;
-    font-weight: 500;
-    padding: 14px 18px;
+    max-width: 500px;
+    font-size: 20px;
+    font-weight: 600;
+    background: transparent;
     border: none;
-    border-radius: 12px;
-    background: var(--ball-dark);
-    color: var(--text-main);
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
+    border-bottom: 2px solid #444;
+    color: #eee;
+    padding: 6px 8px;
     outline: none;
-    caret-color: var(--blue-glow);
-    box-shadow: 0 0 8px #0008;
-    transition: box-shadow 0.3s ease, background 0.3s ease;
+    text-align: center;
+    caret-color: #0a84ff;
     user-select: text;
+    transition: border-color 0.3s ease;
   }
 
-  #questionInput::placeholder {
-    color: var(--text-muted);
-    opacity: 0.6;
-    font-style: italic;
+  #input-field::placeholder {
+    color: #444;
+  }
+  #input-field:focus {
+    border-bottom-color: #0a84ff;
   }
 
-  #questionInput:focus {
-    box-shadow: 0 0 18px var(--blue-glow);
-    background: #1f1f1f;
+  /* Canvas full screen */
+  #canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    user-select: none;
+    touch-action: none;
   }
 </style>
 </head>
 <body>
-
-  <div id="eightBall" aria-label="Magic 8 Ball" role="img">
-    <div id="shine"></div>
-    <div id="triangleContainer" aria-live="polite" aria-atomic="true">
-      <div id="triangle"></div>
-      <div id="answerText"></div>
-    </div>
-  </div>
-
-  <div id="questionBox" aria-live="polite" aria-atomic="true">
-    <div id="questionText" aria-label="User question"></div>
+  <div id="question-container" aria-live="polite" aria-atomic="true" role="region">
+    <p id="question-text"></p>
     <div id="underline"></div>
-    <div id="helperText">*press enter to ask*</div>
+    <div id="helper-text">*press enter to ask*</div>
   </div>
+  <input id="input-field" type="text" autocomplete="off" placeholder="Type your question here..." aria-label="Ask your question" />
 
-  <input
-    id="questionInput"
-    type="text"
-    placeholder="Type your question here..."
-    autocomplete="off"
-    spellcheck="false"
-    aria-label="Question input"
-  />
+  <canvas id="canvas" aria-label="3D Magic 8 Ball"></canvas>
 
+  <!-- THREE.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <!-- GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
   <script>
-    const answers = [
-      "It is certain",
-      "It is decidedly so",
-      "Without a doubt",
-      "Yes, definitely",
-      "You may rely on it",
-      "As I see it, yes",
-      "Most likely",
-      "Outlook good",
-      "Yes",
-      "Signs point to yes",
-      "Reply hazy",
-      "Ask again later",
-      "Better not tell you",
-      "Cannot predict now",
-      "Concentrate again",
-      "Don't count on it",
-      "My reply is no",
-      "My sources say no",
-      "Outlook not so good",
-      "Very doubtful"
-    ];
+    (() => {
+      const answers = [
+        "It is certain", "It is decidedly so", "Without a doubt", "Yes, definitely",
+        "You may rely on it", "As I see it, yes", "Most likely", "Outlook good",
+        "Yes", "Signs point to yes", "Reply hazy, try again", "Ask again later",
+        "Better not tell you now", "Cannot predict now", "Concentrate and ask again",
+        "Don't count on it", "My reply is no", "My sources say no",
+        "Outlook not so good", "Very doubtful"
+      ];
 
-    const input = document.getElementById('questionInput');
-    const questionText = document.getElementById('questionText');
-    const answerText = document.getElementById('answerText');
-    const triangleContainer = document.getElementById('triangleContainer');
-    const eightBall = document.getElementById('eightBall');
+      // === THREE.js Setup ===
+      const scene = new THREE.Scene();
 
-    // Idle float for ball and subtle slow rotation for triangle container
-    gsap.to(eightBall, {
-      y: -6,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut",
-      duration: 3
-    });
+      // Camera setup
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0.6, 6);
 
-    gsap.to(triangleContainer, {
-      rotationY: 15,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut",
-      duration: 5,
-      transformOrigin: "50% 50%"
-    });
+      // Renderer
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('canvas'),
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance",
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000);
 
-    function showAnswer(question, answer) {
-      questionText.textContent = question;
-      answerText.textContent = answer;
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0x111111);
+      scene.add(ambientLight);
 
-      gsap.fromTo(questionText,
-        { y: 0, opacity: 0 },
-        { y: -50, opacity: 1, duration: 1, ease: "power3.out" });
+      const pointLight = new THREE.PointLight(0xffffff, 1.5);
+      pointLight.position.set(6, 6, 6);
+      scene.add(pointLight);
 
-      gsap.fromTo(answerText,
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)" });
+      // Add subtle rim light for better silhouette
+      const rimLight = new THREE.DirectionalLight(0x3399ff, 0.3);
+      rimLight.position.set(-5, 5, 5);
+      scene.add(rimLight);
 
-      gsap.fromTo('#underline',
-        { boxShadow: "0 0 0px transparent" },
-        { boxShadow: "0 0 8px var(--blue-glow)", duration: 1, yoyo: true, repeat: 1 });
-    }
+      // Magic 8 Ball base sphere with polished glossy black
+      const ballGeometry = new THREE.SphereGeometry(1.5, 128, 128);
+      const ballMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x101010,
+        metalness: 0.8,
+        roughness: 0.25,
+        clearcoat: 1,
+        clearcoatRoughness: 0.05,
+        reflectivity: 0.8,
+        envMapIntensity: 1,
+      });
+      const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+      scene.add(ball);
 
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
+      // Glowing front window - translucent blue glass look
+      const windowGeometry = new THREE.CircleGeometry(0.65, 64);
+      const windowMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x0026ff,
+        emissive: 0x003eff,
+        emissiveIntensity: 0.6,
+        roughness: 0.15,
+        metalness: 0.4,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide,
+        clearcoat: 1,
+        clearcoatRoughness: 0.05,
+      });
+      const ballWindow = new THREE.Mesh(windowGeometry, windowMaterial);
+      ballWindow.position.z = 1.52;
+      ballWindow.rotation.x = -Math.PI / 2;
+      ball.add(ballWindow);
+
+      // Inner icosahedron (the die) with emissive edges
+      const dieGeometry = new THREE.IcosahedronGeometry(0.6);
+      const dieMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x0047b3,
+        metalness: 0.7,
+        roughness: 0.2,
+        clearcoat: 1,
+        clearcoatRoughness: 0.05,
+        flatShading: true,
+        emissive: 0x001933,
+        emissiveIntensity: 0.8
+      });
+      const die = new THREE.Mesh(dieGeometry, dieMaterial);
+      scene.add(die);
+
+      // Text canvas for answer display on the window
+      const textCanvas = document.createElement('canvas');
+      textCanvas.width = 512;
+      textCanvas.height = 512;
+      const ctx = textCanvas.getContext('2d');
+      const textTexture = new THREE.CanvasTexture(textCanvas);
+      textTexture.minFilter = THREE.LinearFilter;
+      textTexture.magFilter = THREE.LinearFilter;
+
+      // Plane to show the answer text, slightly in front of window
+      const textPlaneMaterial = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true, opacity: 0 });
+      const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), textPlaneMaterial);
+      textPlane.position.z = 1.53;
+      ball.add(textPlane);
+
+      // Text drawing helper (wraps text nicely)
+      function drawAnswer(text) {
+        ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+
+        // Subtle radial glow behind text
+        const gradient = ctx.createRadialGradient(textCanvas.width/2, textCanvas.height/2, 50, textCanvas.width/2, textCanvas.height/2, 220);
+        gradient.addColorStop(0, 'rgba(0,68,255,0.85)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, textCanvas.width, textCanvas.height);
+
+        // Draw answer text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 48px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+        ctx.shadowBlur = 12;
+        wrapText(ctx, text, textCanvas.width / 2, textCanvas.height / 2, 440, 52);
+
+        textTexture.needsUpdate = true;
+      }
+
+      // Text wrapping utility
+      function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        let lines = [];
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          const testWidth = ctx.measureText(testLine).width;
+          if (testWidth > maxWidth && n > 0) {
+            lines.push(line.trim());
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line.trim());
+
+        // Calculate vertical starting point for vertically centered text
+        let startY = y - (lines.length - 1) * lineHeight / 2;
+        lines.forEach((line, i) => {
+          ctx.fillText(line, x, startY + (i * lineHeight));
+        });
+      }
+
+      // Die spin animation
+      function animateDie(onComplete) {
+        const startRot = { x: die.rotation.x, y: die.rotation.y, z: die.rotation.z };
+        const spins = 5 + Math.random() * 4;
+        const targetRot = {
+          x: startRot.x + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
+          y: startRot.y + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
+          z: startRot.z + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1)
+        };
+
+        gsap.to(die.rotation, {
+          x: targetRot.x,
+          y: targetRot.y,
+          z: targetRot.z,
+          duration: 1.8,
+          ease: "power4.inOut",
+          onComplete: onComplete
+        });
+      }
+
+      // Window glow pulse animation
+      function glowPulse() {
+        gsap.to(ballWindow.material, {
+          emissiveIntensity: 2.2,
+          duration: 0.6,
+          yoyo: true,
+          repeat: 3,
+          ease: "sine.inOut"
+        });
+      }
+
+      // Fade in answer text on window
+      function fadeInAnswer() {
+        gsap.fromTo(textPlane.material, {opacity: 0}, {opacity: 1, duration: 1.4, ease: "power2.inOut"});
+      }
+
+      // UI Elements
+      const input = document.getElementById('input-field');
+      const questionText = document.getElementById('question-text');
+      const questionContainer = document.getElementById('question-container');
+      const helperText = document.getElementById('helper-text');
+
+      // Animate question container moving from bottom to top
+      function animateQuestionUp() {
+        return gsap.to(questionContainer, {
+          duration: 1.2,
+          ease: "power2.out",
+          bottom: "auto",
+          top: "30px",
+          onComplete: () => { helperText.style.opacity = 0; }
+        });
+      }
+      // Animate question container down and reset UI
+      function animateQuestionDown() {
+        return gsap.to(questionContainer, {
+          duration: 1.2,
+          ease: "power2.inOut",
+          top: "auto",
+          bottom: "40px",
+          onComplete: () => {
+            helperText.style.opacity = 1;
+            input.value = "";
+            input.disabled = false;
+            questionText.textContent = "";
+            gsap.to(textPlane.material, {opacity: 0, duration: 0.5});
+          }
+        });
+      }
+
+      // Main ask function
+      async function ask() {
         const question = input.value.trim();
         if (!question) return;
 
+        input.disabled = true;
+        questionText.textContent = question;
+        await animateQuestionUp();
+
+        glowPulse();
+
         const answer = answers[Math.floor(Math.random() * answers.length)];
-        showAnswer(question, answer);
+        animateDie(() => {
+          drawAnswer(answer);
+          fadeInAnswer();
 
-        input.value = "";
-
-        gsap.fromTo('#questionBox',
-          { y: 60, opacity: 0 },
-          { y: -130, opacity: 1, duration: 1.5, ease: "power3.out" });
+          // Reset UI after 3.5 seconds
+          setTimeout(() => {
+            animateQuestionDown();
+          }, 3500);
+        });
       }
-    });
-  </script>
 
+      // Enter key handler
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          ask();
+        }
+      });
+
+      // Animate loop for 3D objects
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Slow, subtle rotation for natural life
+        ball.rotation.y += 0.003;
+        die.rotation.x += 0.005;
+        die.rotation.y += 0.007;
+
+        // Idle subtle pulse glow on the window material emissiveIntensity
+        const pulse = 1.1 + Math.sin(Date.now() * 0.002) * 0.2;
+        ballWindow.material.emissiveIntensity = pulse;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Responsive handling
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+  </script>
 </body>
 </html>
