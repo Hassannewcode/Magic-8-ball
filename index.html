@@ -1,359 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Magic 8 Ball</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@600&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Magic 8 Ball</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
 
-  html, body {
-    margin: 0; padding: 0; overflow: hidden;
-    height: 100vh;
-    background-color: #000;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #eee;
-    user-select: none;
-  }
-  #question-container {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 90vw;
-    width: 500px;
-    text-align: center;
-    cursor: text;
-    z-index: 10;
-  }
-  #question-text {
-    font-size: 28px;
-    font-weight: 600;
-    color: #eee;
-    margin: 0;
-    user-select: text;
-  }
-  #underline {
-    margin-top: 6px;
-    border-bottom: 2px solid #555;
-    width: 100%;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  #helper-text {
-    font-size: 14px;
-    font-style: italic;
-    color: #555;
-    margin-top: 8px;
-    user-select: none;
-  }
-  #input-field {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 500px;
-    font-size: 20px;
-    font-weight: 600;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #666;
-    color: #eee;
-    padding: 6px 8px;
-    outline: none;
-    text-align: center;
-    user-select: text;
-    caret-color: #0a84ff;
-  }
-  #input-field::placeholder {
-    color: #444;
-  }
+    :root {
+      --bg-color: #121212; /* matte black */
+      --ball-dark: #222831;
+      --ball-light: #393e46;
+      --glow-blue: #4fc3f7;
+      --text-main: #eeeeee;
+      --text-muted: #999999;
+      --triangle-blue: #1e88e5;
+      --line-color: #bbbbbb;
+    }
 
-  /* Canvas full screen */
-  #canvas {
-    display: block;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    user-select: none;
-    touch-action: none;
-  }
-</style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #eightBall {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle at 30% 30%, var(--ball-light), var(--ball-dark));
+      border-radius: 50%;
+      box-shadow:
+        inset 0 6px 20px rgba(255 255 255 / 0.12),
+        0 0 40px rgba(79,195,247, 0.2);
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+      perspective: 800px;
+      cursor: default;
+      user-select: none;
+    }
+
+    #ballShine {
+      position: absolute;
+      top: 30px;
+      left: 50px;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 25% 25%, #ffffff44, transparent 80%);
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(6px);
+      transform: rotate(-15deg);
+      z-index: 10;
+    }
+
+    #triangleContainer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 140px;
+      height: 120px;
+      transform-style: preserve-3d;
+      transform-origin: center;
+      transform: translate(-50%, -55%);
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px var(--glow-blue));
+    }
+
+    #triangle {
+      width: 0;
+      height: 0;
+      border-left: 70px solid transparent;
+      border-right: 70px solid transparent;
+      border-bottom: 120px solid var(--triangle-blue);
+      filter: drop-shadow(0 0 12px var(--glow-blue));
+      border-radius: 10px;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      box-shadow:
+        0 0 30px var(--glow-blue),
+        inset 0 0 40px var(--glow-blue);
+    }
+
+    #answerText {
+      position: absolute;
+      top: 45px;
+      left: 50%;
+      width: 110px;
+      transform: translateX(-50%);
+      color: #d0e9ff;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      letter-spacing: 0.02em;
+      text-shadow:
+        0 0 6px #a0cfff,
+        0 0 14px #80bfff;
+      user-select: none;
+      line-height: 1.2em;
+      min-height: 3em;
+      word-wrap: break-word;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px #88c9ff);
+    }
+
+    #questionBox {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+      max-width: 600px;
+      text-align: center;
+      user-select: text;
+      z-index: 100;
+    }
+
+    #questionText {
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      min-height: 34px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #underlineLine {
+      width: 100%;
+      max-width: 600px;
+      height: 2px;
+      margin: 0 auto 8px auto;
+      background: var(--line-color);
+      user-select: none;
+    }
+
+    #helperText {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-style: italic;
+      font-family: 'Poppins', sans-serif;
+      user-select: none;
+    }
+
+    #questionInput {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+      max-width: 600px;
+      font-size: 22px;
+      font-weight: 500;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      background: var(--ball-dark);
+      color: var(--text-main);
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      user-select: text;
+      transition: box-shadow 0.3s ease;
+      box-shadow: 0 0 8px #00000044;
+      caret-color: var(--glow-blue);
+    }
+
+    #questionInput::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    #questionInput:focus {
+      box-shadow: 0 0 15px var(--glow-blue);
+      background: #1c1f26;
+    }
+
+    /* GSAP animations triggers */
+
+  </style>
 </head>
 <body>
-  <div id="question-container" aria-live="polite" aria-atomic="true">
-    <p id="question-text"></p>
-    <div id="underline"></div>
-    <div id="helper-text">*press enter to ask*</div>
+
+  <div id="eightBall">
+    <div id="ballShine"></div>
+    <div id="triangleContainer">
+      <div id="triangle"></div>
+      <div id="answerText"></div>
+    </div>
   </div>
-  <input id="input-field" type="text" autocomplete="off" placeholder="Type your question here..." aria-label="Ask your question" />
 
-  <canvas id="canvas" aria-label="3D Magic 8 Ball"></canvas>
+  <div id="questionBox">
+    <div id="questionText"></div>
+    <div id="underlineLine"></div>
+    <div id="helperText">*press enter to ask*</div>
+  </div>
 
-  <!-- THREE.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-  <!-- GSAP -->
+  <input
+    id="questionInput"
+    type="text"
+    placeholder="Type your question here..."
+    autocomplete="off"
+    spellcheck="false"
+  />
+
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
-
   <script>
-    (() => {
-      const answers = [
-        "It is certain", "It is decidedly so", "Without a doubt", "Yes, definitely",
-        "You may rely on it", "As I see it, yes", "Most likely", "Outlook good",
-        "Yes", "Signs point to yes", "Reply hazy, try again", "Ask again later",
-        "Better not tell you now", "Cannot predict now", "Concentrate and ask again",
-        "Don't count on it", "My reply is no", "My sources say no",
-        "Outlook not so good", "Very doubtful"
-      ];
+    const answers = [
+      "It is certain",
+      "It is decidedly so",
+      "Without a doubt",
+      "Yes, definitely",
+      "You may rely on it",
+      "As I see it, yes",
+      "Most likely",
+      "Outlook good",
+      "Yes",
+      "Signs point to yes",
+      "Reply hazy",
+      "Ask again later",
+      "Better not tell you",
+      "Cannot predict now",
+      "Concentrate again",
+      "Don't count on it",
+      "My reply is no",
+      "My sources say no",
+      "Outlook not so good",
+      "Very doubtful"
+    ];
 
-      // THREE.js setup
-      const scene = new THREE.Scene();
+    const input = document.getElementById('questionInput');
+    const questionText = document.getElementById('questionText');
+    const answerText = document.getElementById('answerText');
+    const triangleContainer = document.getElementById('triangleContainer');
+    const eightBall = document.getElementById('eightBall');
+    const helperText = document.getElementById('helperText');
 
-      // Camera setup
-      const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 0.5, 6);
+    // Idle animation for the ball & triangle - gentle floating and subtle 3D rotation
+    gsap.to(eightBall, {
+      y: -8,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut",
+      duration: 3
+    });
+    gsap.to(triangleContainer, {
+      rotationY: 12,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut",
+      duration: 4,
+      transformOrigin: "50% 50%"
+    });
 
-      // Renderer
-      const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true, alpha: false });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setClearColor(0x000000);
+    // Show question and answer with smooth animations
+    function showAnswer(question, answer) {
+      questionText.textContent = question;
+      answerText.textContent = answer;
 
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0x222222);
-      scene.add(ambientLight);
+      // Animate question upwards and fade out after 5s
+      gsap.fromTo(questionText, 
+        { y: 0, opacity: 0 }, 
+        { y: -50, opacity: 1, duration: 1, ease: "power3.out" });
 
-      const pointLight = new THREE.PointLight(0xffffff, 1.5);
-      pointLight.position.set(5, 5, 5);
-      scene.add(pointLight);
+      // Animate answer text fade + pop inside triangle
+      gsap.fromTo(answerText, 
+        { scale: 0.8, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)" });
 
-      // Magic 8 Ball base sphere
-      const ballGeometry = new THREE.SphereGeometry(1.5, 128, 128);
-      const ballMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x111111,
-        metalness: 0.6,
-        roughness: 0.7,
-        clearcoat: 1,
-        clearcoatRoughness: 0.1,
-        reflectivity: 0.5,
-      });
-      const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-      scene.add(ball);
+      // Animate underline line glow
+      gsap.fromTo("#underlineLine", 
+        { boxShadow: "0 0 0px transparent" },
+        { boxShadow: "0 0 8px var(--glow-blue)", duration: 1, yoyo: true, repeat: 1 });
+    }
 
-      // Glowing front window
-      const windowGeometry = new THREE.CircleGeometry(0.65, 64);
-      const windowMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x0022ff,
-        emissive: 0x0044ff,
-        emissiveIntensity: 0.6,
-        roughness: 0.2,
-        metalness: 0.3,
-        transparent: true,
-        opacity: 0.85,
-        side: THREE.DoubleSide,
-        clearcoat: 1,
-        clearcoatRoughness: 0.1,
-      });
-      const ballWindow = new THREE.Mesh(windowGeometry, windowMaterial);
-      ballWindow.position.z = 1.52;
-      ballWindow.rotation.x = -Math.PI / 2;
-      ball.add(ballWindow);
-
-      // Inner icosahedron (the die)
-      const dieGeometry = new THREE.IcosahedronGeometry(0.6);
-      const dieMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x0033cc,
-        metalness: 0.7,
-        roughness: 0.3,
-        clearcoat: 1,
-        clearcoatRoughness: 0.1,
-        flatShading: true,
-        emissive: 0x001122,
-        emissiveIntensity: 0.6
-      });
-      const die = new THREE.Mesh(dieGeometry, dieMaterial);
-      scene.add(die);
-
-      // Canvas for answer text on window
-      const textCanvas = document.createElement('canvas');
-      textCanvas.width = 512;
-      textCanvas.height = 512;
-      const ctx = textCanvas.getContext('2d');
-      const textTexture = new THREE.CanvasTexture(textCanvas);
-
-      const textPlaneMaterial = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true, opacity: 0 });
-      const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), textPlaneMaterial);
-      textPlane.position.z = 1.53;
-      ball.add(textPlane);
-
-      function drawAnswer(text) {
-        ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-
-        const gradient = ctx.createRadialGradient(textCanvas.width/2, textCanvas.height/2, 50, textCanvas.width/2, textCanvas.height/2, 220);
-        gradient.addColorStop(0, 'rgba(0,68,255,0.8)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0)');
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, textCanvas.width, textCanvas.height);
-
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 44px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,0.7)';
-        ctx.shadowBlur = 10;
-        wrapText(ctx, text, textCanvas.width / 2, textCanvas.height / 2, 440, 50);
-
-        textTexture.needsUpdate = true;
-      }
-
-      // Helper function to wrap text on canvas
-      function wrapText(context, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' ');
-        let line = '';
-        let lines = [];
-        for (let n = 0; n < words.length; n++) {
-          let testLine = line + words[n] + ' ';
-          let metrics = context.measureText(testLine);
-          let testWidth = metrics.width;
-          if (testWidth > maxWidth && n > 0) {
-            lines.push(line);
-            line = words[n] + ' ';
-          } else {
-            line = testLine;
-          }
-        }
-        lines.push(line);
-
-        let startY = y - (lines.length-1) * lineHeight / 2;
-        for(let i = 0; i < lines.length; i++) {
-          context.fillText(lines[i], x, startY + (i * lineHeight));
-        }
-      }
-
-      // Animate die spin with GSAP inertia easing
-      function animateDie(onComplete) {
-        const startRot = { x: die.rotation.x, y: die.rotation.y, z: die.rotation.z };
-        const spins = 5 + Math.random() * 4;
-        const targetRot = {
-          x: startRot.x + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
-          y: startRot.y + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1),
-          z: startRot.z + Math.PI * 2 * spins * (Math.random() > 0.5 ? 1 : -1)
-        };
-
-        gsap.to(die.rotation, {
-          x: targetRot.x,
-          y: targetRot.y,
-          z: targetRot.z,
-          duration: 1.8,
-          ease: "power4.inOut",
-          onComplete: onComplete
-        });
-      }
-
-      // Glow pulse on the window
-      function glowPulse() {
-        gsap.to(ballWindow.material, {
-          emissiveIntensity: 2,
-          duration: 0.5,
-          yoyo: true,
-          repeat: 3,
-          ease: "sine.inOut"
-        });
-      }
-
-      // Animate answer fade in
-      function fadeInAnswer() {
-        gsap.fromTo(textPlane.material, {opacity: 0}, {opacity: 1, duration: 1.2, ease: "power1.inOut"});
-      }
-
-      // UI Elements
-      const input = document.getElementById('input-field');
-      const questionText = document.getElementById('question-text');
-      const questionContainer = document.getElementById('question-container');
-      const helperText = document.getElementById('helper-text');
-
-      // Animate question container from bottom to top
-      function animateQuestionUp() {
-        return gsap.to(questionContainer, {
-          duration: 1.2,
-          ease: "power2.out",
-          bottom: "auto",
-          top: "30px",
-          onComplete: () => {
-            helperText.style.opacity = 0;
-          }
-        });
-      }
-      // Animate question container down and reset
-      function animateQuestionDown() {
-        return gsap.to(questionContainer, {
-          duration: 1.2,
-          ease: "power2.inOut",
-          top: "auto",
-          bottom: "40px",
-          onComplete: () => {
-            helperText.style.opacity = 1;
-            input.value = "";
-            input.disabled = false;
-            questionText.textContent = "";
-            // Clear answer text fade
-            gsap.to(textPlane.material, {opacity: 0, duration: 0.5});
-          }
-        });
-      }
-
-      // Main ask function
-      async function ask() {
+    input.addEventListener('keydown', e => {
+      if (e.key === "Enter") {
         const question = input.value.trim();
         if (!question) return;
 
-        input.disabled = true;
-        questionText.textContent = question;
-        await animateQuestionUp();
-
-        glowPulse();
-
         const answer = answers[Math.floor(Math.random() * answers.length)];
-        animateDie(() => {
-          drawAnswer(answer);
-          fadeInAnswer();
+        showAnswer(question, answer);
 
-          // After showing answer, reset UI after 3 seconds
-          setTimeout(() => {
-            animateQuestionDown();
-          }, 3000);
-        });
+        // Clear input after asking
+        input.value = "";
+
+        // Animate question text from bottom center to top center
+        gsap.fromTo('#questionBox', 
+          { y: 60, opacity: 0 },
+          { y: -130, opacity: 1, duration: 1.5, ease: "power3.out" });
       }
-
-      // Handle Enter key
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          ask();
-        }
-      });
-
-      // Animation loop
-      function animate() {
-        requestAnimationFrame(animate);
-        // Slow gentle rotation on the ball and die for life
-        ball.rotation.y += 0.003;
-        die.rotation.x += 0.006;
-        die.rotation.y += 0.004;
-
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Responsive handling
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth/window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    })();
+    });
   </script>
 </body>
 </html>
